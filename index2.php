@@ -23,8 +23,6 @@ if(count($files) > 0){
 			// echo $file." is skipped because it looks strange!\n";
 			continue;
 		}
-
-		//Here the file is valid now read the file and split every single text inside
 		//Now gwt thw file extension to determin w=hich command should be used
 		
 		$results = "";
@@ -36,60 +34,8 @@ if(count($files) > 0){
 			// var_dump($extension);
 			if(array_key_exists(strtolower($extension), $supported_languages)){
 				$command = $supported_languages[strtolower($extension)]." ".$scripts_dir."/".$file;
-
 				//Here Make sure to return the text from command
 				$results = exec($command);
-				if($extension == "js"){
-					// var_dump($command, "\n", $results, "\n");
-				}
-			} else if(false){
-				// echo $extension;response
-				//Here Check if the comming code is for javascript
-				if(in_array(strtolower($extension), $supported_client_side_languages)){
-					// var_dump("JS Found for ", $file);
-					$curl = curl_init();
-				    // Set some options - we are passing in a useragent too here
-
-				    $headers = [
-				        'Accept: text/html',
-				    ];
-
-				    $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-				    $host = $_SERVER['HTTP_HOST'];
-				    $uri = str_replace("index.php","",$_SERVER['PHP_SELF']);
-
-				    $url = $protocol.$host.$uri."scripts/".$file;
-				    // echo $url;
-
-				    // var_dump("<pre>", $_SERVER, $url); die();
-				    curl_setopt_array($curl, [
-				        CURLOPT_RETURNTRANSFER => 1,
-				        CURLOPT_URL => $url,
-				        // CURLOPT_USERAGENT => 'HGN Internship program task 1',
-				        CURLOPT_HTTPHEADER => $headers
-				    ]);
-
-				    
-				    // Send the request & save response to $resp
-				    $response = curl_exec($curl);
-				    // var_dump($response); die();
-				    $results = strip_tags($response);
-				    // dd($resp);
-				    // var_dump($results); die();
-				    // Close request to clear up some resources
-				    curl_close($curl);
-				} else {
-					$results = "";
-					$dir = __DIR__;
-					// echo $dir;
-					//Here The command should be read =ing th file as text
-					$fp = fopen($dir."/scripts/".$file, "r+");
-					// var_dump($fp);
-					while ($line = stream_get_line($fp, 1024 * 1024, "\n")) {
-					  $results .= $line;
-					}
-					fclose($fp);
-				}
 			} else {
 				$results = "";
 			}
@@ -108,7 +54,6 @@ if(count($files) > 0){
 			$internPassed['output'] = $results;
 			if(preg_match("/\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+/", $results, $emailsMatch)){
 				// var_dump($emailsMatch, "\n");
-
 				foreach($emailsMatch AS $foundEmail){
 					// var_dump($foundEmail, "<br />");
 					if(preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", trim($foundEmail))){
@@ -117,13 +62,12 @@ if(count($files) > 0){
 					}
 				}
 			}
-			// var_dump($results, "<br />"); continue;
 			//Here Extract the Required Information 
 			$removeHelloword = preg_split("/(Hello World, this is )/", $results);
 			$results = $removeHelloword[1];
 			//Here Get the intern full name from the string returned from its data
 			$splittedInformation = preg_split("/(with HNGi7 ID)/", $results);
-			// var_dump("\n", $splittedInformation, "\n");
+
 			$full_name = str_replace("Hello World, this is ", "", trim($splittedInformation[0])) ;
 			if(!trim($full_name) || preg_match("/[^a-zA-Z0-9_ ]/", $full_name)){
 				$rslt = "Fail";
@@ -132,11 +76,10 @@ if(count($files) > 0){
 
 			$internPassedHTML = "Hello World, this is <b>".$full_name."</b> with ";
 			$internPassed['name'] = $full_name;
-			// var_dump($full_name);
 
 			//Here Extraxt the Intern ID
 			$splittedInformation = preg_split("/( using )/", $remainingPart);
-			// var_dump($splittedInformation);
+
 			$hgni7_id = trim($splittedInformation[0]);
 			if(!trim($hgni7_id) || !preg_match("/^HNG-[0-9]{5}$/", $hgni7_id)){
 				$rslt = "Fail";
@@ -147,7 +90,7 @@ if(count($files) > 0){
 			$internPassed['email']		= $user_email;
 			//remove the last strings informations
 			$language = preg_split("/( for stage 2 task)/", trim($splittedInformation[1]))[0];
-			// $language = str_replace(" for stage 2 task", "", trim($splittedInformation[1]));
+
 			if(!trim($language)){
 				$rslt = "Fail";
 			}
@@ -158,13 +101,11 @@ if(count($files) > 0){
 		}
 		// 
 		if(count($internPassed) == 7){
-			// var_dump("<pre>",$internPassed, "</pre>");
+
 			$foundInterns[] = $internPassed;
 		}
+		$foundInternsHtml .= "<br />".$internPassedHTML;
 
-			$foundInternsHtml .= "<br />".$internPassedHTML;
-		// }
-		// echo "<hr /><hr /><hr />";
 	}
 }
 
@@ -173,5 +114,4 @@ if(isset($_GET['json'])){
 } else {
 	echo $foundInternsHtml;
 }
-// echo "\n";
 ?>
