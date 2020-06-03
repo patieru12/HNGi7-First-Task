@@ -39,6 +39,17 @@ for ($counter = 0; $counter < count($nfiles); $counter++) {
         $php++;
     }
 
+    if($path_info['extension'] == 'java'){
+        $compile = exec("javac scripts/".$file);
+        if(trim($compile) == ""){
+            $directory = dirname(__FILE__) . "/scripts";
+            $command = "java -classpath {$directory} ".str_replace(".".$path_info['extension'], "", $file)." 2>&1 ";
+            $ret = exec($command, $output, $return_var);
+        } else {
+            $userString = "Java program has syntax error";
+        }
+    }
+
     if (isset($output[0])) {
         $userStrings = strip_tags($output[0]);
     } else {
